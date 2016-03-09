@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     //create Background Subtractor objects
     pMOG2 = createBackgroundSubtractorMOG2(); //MOG2 approach
         //input data coming from a video
-        processVideo(argv[2]);
+        processVideo(argv[1]);
     //destroy GUI windows
     destroyAllWindows();
     return EXIT_SUCCESS;
@@ -55,8 +55,12 @@ void processVideo(char* videoFilename) {
                 FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
         //show the current frame and the fg masks
 	line(frame,Point(100,150),Point(120,180),Scalar( 0, 255, 0),8,0);
-imshow("Frame", frame);	
-imshow("FG Mask MOG 2", fgMaskMOG2);
+	if(frameNumberString>"500" && frameNumberString<"550"){
+	Scalar intensity = fgMaskMOG2.at<int>(165, 110); 
+	cout<<endl<<intensity.val[0]<<endl;
+	}
+	imshow("Frame", frame);	
+	imshow("FG Mask MOG 2", fgMaskMOG2);
         //get the input from the keyboard
         keyboard = waitKey( 30 );
     }
