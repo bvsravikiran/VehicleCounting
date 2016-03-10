@@ -3,6 +3,7 @@
 #include "opencv2/videoio.hpp"
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
+#include "opencv2/photo.hpp"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -10,12 +11,12 @@
 using namespace std;
 using namespace cv;
 
-stringstream SSCountl
+stringstream SSCount;
 Mat Frame;
-Mat MaskedFrame;
+Mat MaskedFrame, MaskedFrameWithNoise;
 Ptr<BackgroundSubtractor> BackgroundSubtractorObject;
 int Keyboard, CarCount=0;
-void ProcessVideo(char* VideoFileName);
+int ProcessVideo(char* VideoFileName);
 int main(int argc, char* argv[])
 {
   namedWindow("Frame");
@@ -25,24 +26,27 @@ int main(int argc, char* argv[])
   destroyAllWindows();
   return EXIT_SUCCESS;
 }
-ProcessVideo(char* VideoFileName){
+int ProcessVideo(char* VideoFileName){
   VideoCapture capture(VideoFileName);
   if(!capture.isOpened()){
     cerr << "Unable to open video file" << VideoFileName <<endl;
     exit(EXIT_FAILURE);
   }
-  while ((char)Keyboard!='q' && (char)Keyboard!=27)) {
+  while ((char)Keyboard!='q' && (char)Keyboard!=27) {
     if(!capture.read(Frame)){
       cerr << "Unable to read video" <<endl;
-      exit(EXIT_FAILURE)
+      exit(EXIT_FAILURE);
     }
-  BackgroundSubtractorObject->apply(Frame, MaskedFrame);
+  BackgroundSubtractorObject->apply(Frame, MaskedFrameWithNoise);
+  fastNlMeansDenoising(MaskedFrameWithNoise, MaskedFrame, 3, 7, 21);
   stringstream ss;
   rectangle(Frame, Point(10,2), Point(100,20), Scalar(255,255,255), -1);
   ss << capture.get(CAP_PROP_POS_FRAMES);
   string FrameNumberString = ss.str();
-  putText(Frame, FrameNumberString.c_str(), Point(15,15), FONT_HERSHEY_SIMPLE, 0.5, Scalar(0,0,0));
+  putText(Frame, FrameNumberString.c_str(), cv::Point(15, 15),
+               FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
   imshow("Frame", Frame);
   imshow("MaskedFrame", MaskedFrame);
   Keyboard = waitKey(30);
+  }
 }
