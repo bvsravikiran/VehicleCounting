@@ -15,7 +15,7 @@ stringstream SSCount;
 Mat Frame;
 Mat MaskedFrame, MaskedFrameWithNoise;
 Ptr<BackgroundSubtractor> BackgroundSubtractorObject;
-int Keyboard, CarCount=0, PreviousFrame=2, CurrentFrame=2;
+int Keyboard, CarCount=0;
 int ProcessVideo(char* VideoFileName);
 int main(int argc, char* argv[])
 {
@@ -38,27 +38,15 @@ int ProcessVideo(char* VideoFileName){
       exit(EXIT_FAILURE);
     }
   BackgroundSubtractorObject->apply(Frame, MaskedFrameWithNoise);
-  fastNlMeansDenoising(MaskedFrameWithNoise, MaskedFrame, 1, 7, 21);
+  fastNlMeansDenoising(MaskedFrameWithNoise, MaskedFrame, 3, 7, 21);
   stringstream ss;
   rectangle(Frame, Point(10,2), Point(100,20), Scalar(255,255,255), -1);
   ss << capture.get(CAP_PROP_POS_FRAMES);
   string FrameNumberString = ss.str();
   putText(Frame, FrameNumberString.c_str(), cv::Point(15, 15),
                FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
-  Scalar intensity = MaskedFrame.at<int>(200,190);
-  if(FrameNumberString=="3"){
-  	PreviousFrame=intensity.val[0];
-  	CurrentFrame=0;
-  }
-  CurrentFrame=intensity.val[0];
-  if(PreviousFrame==0 && CurrentFrame!=0){
-  	CarCount++;
-  }
-  PreviousFrame=CurrentFrame;
   imshow("Frame", Frame);
   imshow("MaskedFrame", MaskedFrame);
-  Keyboard = waitKey(1);
-  cout<<endl<<CarCount;
+  Keyboard = waitKey(30);
   }
-  capture.release();
 }
